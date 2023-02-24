@@ -567,6 +567,12 @@ public class JsonReader implements Closeable {
     }
 
     int c = nextNonWhitespace(true);
+
+    // if in strict mode, throw an exception when meet unescaped control characters (U+0000 through U+001F)
+    if (strict && c <= '\u001f') {
+      throw syntaxError("Unescaped control characters");
+    }
+
     switch (c) {
     case ']':
       if (peekStack == JsonScope.EMPTY_ARRAY) {
