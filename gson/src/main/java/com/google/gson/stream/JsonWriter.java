@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 import com.google.gson.FormattingStyle;
+import com.google.gson.Strictness;
 
 /**
  * Writes a JSON (<a href="http://www.ietf.org/rfc/rfc7159.txt">RFC 7159</a>)
@@ -191,7 +192,7 @@ public class JsonWriter implements Closeable, Flushable {
    */
   private String separator = ":";
 
-  private boolean lenient;
+  private Strictness strictness = Strictness.DEFAULT;
 
   private boolean htmlSafe;
 
@@ -257,24 +258,45 @@ public class JsonWriter implements Closeable, Flushable {
   }
 
   /**
-   * Configure this writer to relax its syntax rules. By default, this writer
-   * only emits well-formed JSON as specified by <a
-   * href="http://www.ietf.org/rfc/rfc7159.txt">RFC 7159</a>. Setting the writer
-   * to lenient permits the following:
-   * <ul>
-   *   <li>Numbers may be {@link Double#isNaN() NaNs} or {@link
-   *       Double#isInfinite() infinities}.
-   * </ul>
+   * Set the strictness of this writer. See {@link JsonWriter#setStrictness(Strictness)} on what this entaisl.
+   * @param lenient Whether this writer should be lenient. If true, the strictness is set to {@link Strictness#LENIENT}.
+   *                If false, the strictness is set to {@link Strictness#DEFAULT}.
    */
   public final void setLenient(boolean lenient) {
-    this.lenient = lenient;
+    this.strictness = lenient ? Strictness.LENIENT : Strictness.DEFAULT;
   }
 
   /**
-   * Returns true if this writer has relaxed syntax rules.
+   * Returns true if this writer has a <code>strictness</code> value of {@link Strictness#LENIENT}. See
+   * {@link JsonWriter#setStrictness(Strictness)} for details on what this entails.
+   * @see JsonWriter#setStrictness(Strictness)
    */
   public boolean isLenient() {
-    return lenient;
+    return strictness == Strictness.LENIENT;
+  }
+
+  /**
+   * Configure how strict this writer is with regard to the syntax rules specified in <a
+   * href="http://www.ietf.org/rfc/rfc7159.txt">RFC 7159</a>. By default, {@link Strictness#DEFAULT} is used.
+   * <ul>
+   *     <li>{@link Strictness#DEFAULT} and {@link Strictness#DEFAULT}: The behavior of these
+   *     is currently identical. In these strictness modes, the writer only writes JSON in accordance to
+   *     <a href="http://www.ietf.org/rfc/rfc7159.txt">RFC 7159</a>.</li>
+   *     <li>{@link Strictness#LENIENT}: This mode relaxes the behavior of the writer to allow the writing of
+   *     {@link Double#isNaN() NaNs} and {@link Double#isInfinite() infinities}.</li>
+   * </ul>
+   * @param strictness the new strictness of this writer. Can not be null.
+   * @throws NullPointerException A null pointer exception is thrown if the provided <code>strictness</code> is null.
+   */
+  public final void setStrictness(Strictness strictness) {
+    this.strictness = Objects.requireNonNull(strictness);
+  }
+
+  /**
+   * Returns how strict this writer is. See {@linkplain JsonWriter#setStrictness(Strictness)} for more details.
+   */
+  public final Strictness getStrictness() {
+    return strictness;
   }
 
   /**
@@ -532,7 +554,7 @@ public class JsonWriter implements Closeable, Flushable {
    */
   public JsonWriter value(float value) throws IOException {
     writeDeferredName();
-    if (!lenient && (Float.isNaN(value) || Float.isInfinite(value))) {
+    if (strictness != Strictness.LENIENT && (Float.isNaN(value) || Float.isInfinite(value))) {
       throw new IllegalArgumentException("Numeric values must be finite, but was " + value);
     }
     beforeValue();
@@ -551,7 +573,7 @@ public class JsonWriter implements Closeable, Flushable {
    */
   public JsonWriter value(double value) throws IOException {
     writeDeferredName();
-    if (!lenient && (Double.isNaN(value) || Double.isInfinite(value))) {
+    if (strictness != Strictness.LENIENT && (Double.isNaN(value) || Double.isInfinite(value))) {
       throw new IllegalArgumentException("Numeric values must be finite, but was " + value);
     }
     beforeValue();
@@ -601,7 +623,7 @@ public class JsonWriter implements Closeable, Flushable {
     writeDeferredName();
     String string = value.toString();
     if (string.equals("-Infinity") || string.equals("Infinity") || string.equals("NaN")) {
-      if (!lenient) {
+      if (strictness != Strictness.LENIENT) {
         throw new IllegalArgumentException("Numeric values must be finite, but was " + string);
       }
     } else {
@@ -710,7 +732,7 @@ public class JsonWriter implements Closeable, Flushable {
   private void beforeValue() throws IOException {
     switch (peek()) {
     case NONEMPTY_DOCUMENT:
-      if (!lenient) {
+      if (strictness != Strictness.LENIENT) {
         throw new IllegalStateException(
             "JSON must have only one top-level value.");
       }

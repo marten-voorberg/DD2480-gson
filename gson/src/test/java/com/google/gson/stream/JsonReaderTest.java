@@ -50,7 +50,7 @@ public final class JsonReaderTest {
       reader.nextString();
       fail();
     } catch (IOException expected) {
-
+      assertThat(expected.getMessage()).contains("Cannot escape a newline character in strict mode!");
     }
   }
 
@@ -62,7 +62,7 @@ public final class JsonReaderTest {
   }
 
   @Test
-  public void testStrictModeFailsToParseUnespacedControlCharacter() {
+  public void testStrictModeFailsToParseUnescapedControlCharacter() {
     String json = "\"\t\"";
     JsonReader reader = new JsonReader(reader(json));
     reader.setStrictness(Strictness.STRICT);
@@ -75,7 +75,7 @@ public final class JsonReaderTest {
   }
 
   @Test
-  public void testNonStrictModeParsesUnespacedControlCharacter() throws IOException {
+  public void testNonStrictModeParsesUnescapedControlCharacter() throws IOException {
     String json = "\"\t\"";
     JsonReader reader = new JsonReader(reader(json));
     assertThat(reader.nextString()).isEqualTo("\t");
