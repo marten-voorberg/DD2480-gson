@@ -70,9 +70,12 @@ public final class JsonWriterTest {
   @Test
   public void testSetStrictnessNull() throws IOException {
     JsonWriter jsonWriter = new JsonWriter(new StringWriter());
-    assertThrows(NullPointerException.class, () -> jsonWriter.setStrictness(null));
-    jsonWriter.value(false);
-    jsonWriter.close();
+    try {
+      assertThrows(NullPointerException.class, () -> jsonWriter.setStrictness(null));
+    } finally {
+      jsonWriter.value(false);
+      jsonWriter.close();
+    }
   }
 
   @Test
