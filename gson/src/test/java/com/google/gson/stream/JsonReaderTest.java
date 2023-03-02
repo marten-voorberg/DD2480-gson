@@ -67,7 +67,7 @@ public final class JsonReaderTest {
   @Test
   public void testSetStrictnessNull() {
     JsonReader reader = new JsonReader(reader("{}"));
-    NullPointerException expected = assertThrows(NullPointerException.class, () -> reader.setStrictness(null));
+    assertThrows(NullPointerException.class, () -> reader.setStrictness(null));
   }
 
   @Test
