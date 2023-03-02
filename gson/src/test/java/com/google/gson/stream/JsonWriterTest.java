@@ -17,6 +17,7 @@
 package com.google.gson.stream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.gson.FormattingStyle;
@@ -69,15 +70,9 @@ public final class JsonWriterTest {
   @Test
   public void testSetStrictnessNull() throws IOException {
     JsonWriter jsonWriter = new JsonWriter(new StringWriter());
-    try {
-      jsonWriter.setStrictness(null);
-      fail();
-    } catch (NullPointerException expected) {
-      // OK: Setting the strictness to null should throw a null pointer exception!
-    } finally {
-      jsonWriter.value(false);
-      jsonWriter.close();
-    }
+    assertThrows(NullPointerException.class, () -> jsonWriter.setStrictness(null));
+    jsonWriter.value(false);
+    jsonWriter.close();
   }
 
   @Test
