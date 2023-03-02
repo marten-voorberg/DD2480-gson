@@ -68,13 +68,8 @@ public final class JsonReaderTest {
   public void testSetStrictnessNull() {
     JsonReader reader = new JsonReader(reader("{}"));
 
-
-    try {
-      reader.setStrictness(null);
-      fail();
-    } catch (NullPointerException expected) {
-      //OK: It should not be possible to set the strictness to null.
-    }
+    NullPointerException expected = assertThrows(NullPointerException.class, () -> reader.setStrictness(null));
+    //OK: It should not be possible to set the strictness to null.
   }
 
   @Test
@@ -82,10 +77,8 @@ public final class JsonReaderTest {
     String json = "\"\\\n\"";
     JsonReader reader = new JsonReader(reader(json));
     reader.setStrictness(Strictness.STRICT);
-    IOException expected = assertThrows(IOException.class, () -> {
-        reader.nextString();
-    });
 
+    IOException expected = assertThrows(IOException.class, reader::nextString);
     assertThat(expected.getMessage()).contains("Cannot escape a newline character in strict mode!");
   }
 
@@ -102,10 +95,7 @@ public final class JsonReaderTest {
     JsonReader reader = new JsonReader(reader(json));
     reader.setStrictness(Strictness.STRICT);
 
-    IOException expected = assertThrows(IOException.class, () -> {
-      reader.nextString();
-    });
-
+    IOException expected = assertThrows(IOException.class, reader::nextString);
     assertThat(expected.getMessage()).contains("strict");
   }
 
@@ -121,20 +111,14 @@ public final class JsonReaderTest {
     JsonReader reader = new JsonReader(reader("TRUE"));
     reader.setStrictness(Strictness.STRICT);
 
-    IOException expected = assertThrows(IOException.class, () -> {
-      reader.nextString();
-    });
-
+    IOException expected = assertThrows(IOException.class, reader::nextString);
     assertThat(expected).hasMessageThat().isEqualTo("Use JsonReader.setLenient(true) to accept malformed" +
             " JSON at line 1 column 1 path $");
 
-    JsonReader secondReader = new JsonReader(reader("True"));
-    secondReader.setStrictness(Strictness.STRICT);
+    reader = new JsonReader(reader("True"));
+    reader.setStrictness(Strictness.STRICT);
 
-    expected = assertThrows(IOException.class, () -> {
-      secondReader.nextString();
-    });
-
+    expected = assertThrows(IOException.class, reader::nextString);
     assertThat(expected).hasMessageThat().isEqualTo("Use JsonReader.setLenient(true) to accept malformed" +
             " JSON at line 1 column 1 path $");
   }
@@ -144,20 +128,14 @@ public final class JsonReaderTest {
     JsonReader reader = new JsonReader(reader("NULL"));
     reader.setStrictness(Strictness.STRICT);
 
-    IOException expected = assertThrows(IOException.class, () -> {
-      reader.nextNull();
-    });
-
+    IOException expected = assertThrows(IOException.class, reader::nextNull);
     assertThat(expected).hasMessageThat().isEqualTo("Use JsonReader.setLenient(true) to accept malformed" +
             " JSON at line 1 column 1 path $");
 
-    JsonReader secondReader = new JsonReader(reader("nulL"));
-    secondReader.setStrictness(Strictness.STRICT);
+    reader = new JsonReader(reader("nulL"));
+    reader.setStrictness(Strictness.STRICT);
 
-    expected = assertThrows(IOException.class, () -> {
-      secondReader.nextNull();
-    });
-
+    expected = assertThrows(IOException.class, reader::nextNull);
     assertThat(expected).hasMessageThat().isEqualTo("Use JsonReader.setLenient(true) to accept malformed" +
             " JSON at line 1 column 1 path $");
   }
@@ -167,20 +145,14 @@ public final class JsonReaderTest {
     JsonReader reader = new JsonReader(reader("FALSE"));
     reader.setStrictness(Strictness.STRICT);
 
-    IOException expected = assertThrows(IOException.class, () -> {
-      reader.nextBoolean();
-    });
-
+    IOException expected = assertThrows(IOException.class, reader::nextBoolean);
     assertThat(expected).hasMessageThat().isEqualTo("Use JsonReader.setLenient(true) to accept malformed" +
             " JSON at line 1 column 1 path $");
 
-    JsonReader secondReader = new JsonReader(reader("FaLse"));
-    secondReader.setStrictness(Strictness.STRICT);
+    reader = new JsonReader(reader("FaLse"));
+    reader.setStrictness(Strictness.STRICT);
 
-    expected = assertThrows(IOException.class, () -> {
-      secondReader.nextBoolean();
-    });
-
+    expected = assertThrows(IOException.class, reader::nextBoolean);
     assertThat(expected).hasMessageThat().isEqualTo("Use JsonReader.setLenient(true) to accept malformed" +
             " JSON at line 1 column 1 path $");
   }
@@ -500,10 +472,7 @@ public final class JsonReaderTest {
     JsonReader reader = new JsonReader(reader(json));
     reader.setStrictness(Strictness.STRICT);
 
-    IOException expected = assertThrows(IOException.class, () -> {
-      reader.nextString();
-    });
-
+    IOException expected = assertThrows(IOException.class, reader::nextString);
     assertThat(expected).hasMessageThat().contains("Invalid escaped character \"'\" in strict mode");
   }
 
@@ -533,10 +502,7 @@ public final class JsonReaderTest {
     reader.setStrictness(Strictness.STRICT);
     reader.beginArray();
 
-    IOException expected = assertThrows(IOException.class, () -> {
-      reader.nextString();
-    });
-
+    IOException expected = assertThrows(IOException.class, reader::nextString);
     assertThat(expected).hasMessageThat().contains("Unescaped control characters");
   }
 
