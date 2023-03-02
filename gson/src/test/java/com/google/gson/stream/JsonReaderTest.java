@@ -67,9 +67,7 @@ public final class JsonReaderTest {
   @Test
   public void testSetStrictnessNull() {
     JsonReader reader = new JsonReader(reader("{}"));
-
     NullPointerException expected = assertThrows(NullPointerException.class, () -> reader.setStrictness(null));
-    //OK: It should not be possible to set the strictness to null.
   }
 
   @Test
@@ -96,7 +94,7 @@ public final class JsonReaderTest {
     reader.setStrictness(Strictness.STRICT);
 
     IOException expected = assertThrows(IOException.class, reader::nextString);
-    assertThat(expected.getMessage()).contains("strict");
+    assertThat(expected.getMessage()).contains("Unescaped control characters (\\u0000-\\u001F) are not allowed in strict mode.");
   }
 
   @Test
